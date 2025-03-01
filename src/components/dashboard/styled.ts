@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import { mediaDown } from "../../styles/responsive";
 
 export const DashboardContainer = styled.div`
   display: flex;
@@ -69,8 +70,12 @@ export const DashboardGrid = styled.div`
   grid-template-rows: auto auto;
   gap: ${({ theme }) => theme.spacing.lg};
   
-  @media (max-width: 1200px) {
+  ${({ theme }) => mediaDown.lg(theme)} {
     grid-template-columns: 1fr;
+  }
+  
+  ${({ theme }) => mediaDown.sm(theme)} {
+    gap: ${({ theme }) => theme.spacing.md};
   }
 `;
 
@@ -79,6 +84,12 @@ export const SectionHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: ${({ theme }) => theme.spacing.lg};
+  
+  ${({ theme }) => mediaDown.sm(theme)} {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: ${({ theme }) => theme.spacing.sm};
+  }
 `;
 
 export const SectionTitle = styled.div`

@@ -5,15 +5,22 @@ export interface SidebarProps {
     addBinder: (name: string, icon: string) => void;
 }
 
+export interface SidebarContainerProps {
+    isOpen: boolean;
+}
+
+export interface MobileMenuProps {
+    isOpen: boolean;
+}
+
 export interface NavItemProps {
-isActive: boolean;
+    isActive: boolean;
 }
 
 export interface IconOptionProps {
-isSelected: boolean;
+    isSelected: boolean;
 }
 
 export interface ButtonProps {
     primary?: boolean;
 }
-  

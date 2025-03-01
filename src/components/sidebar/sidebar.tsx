@@ -1,5 +1,5 @@
 // src/components/layout/Sidebar.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {  NavLink, useLocation } from 'react-router-dom';
 import { 
   FiHome, 
@@ -8,10 +8,12 @@ import {
   FiDollarSign, 
   FiFileText,
   FiFolder,
-  FiPlusCircle
+  FiPlusCircle,
+  FiMenu,
+  FiX
 } from 'react-icons/fi';
 import { SidebarProps } from './types';
-import { AddBinderButton, Button, ButtonGroup, IconOption, IconSelector, Input, Logo, Navigation, NavItem, NewBinderForm, SectionTitle, SidebarContainer } from './styled';
+import { AddBinderButton, Button, ButtonGroup, IconOption, IconSelector, Input, Logo, MobileMenuToggle, MobileOverlay, Navigation, NavItem, NewBinderForm, SectionTitle, SidebarContainer } from './styled';
 
 
 const getIconComponent = (iconName: string) => {
@@ -34,6 +36,12 @@ const Sidebar: React.FC<SidebarProps> = ({ binders, addBinder }) => {
   const [showNewBinderForm, setShowNewBinderForm] = useState(false);
   const [newBinderName, setNewBinderName] = useState('');
   const [selectedIcon, setSelectedIcon] = useState('folder');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
 
   const handleAddBinder = () => {
     if (newBinderName.trim()) {
@@ -42,6 +50,10 @@ const Sidebar: React.FC<SidebarProps> = ({ binders, addBinder }) => {
       setSelectedIcon('folder');
       setShowNewBinderForm(false);
     }
+  };
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
   const iconOptions = [
@@ -53,63 +65,71 @@ const Sidebar: React.FC<SidebarProps> = ({ binders, addBinder }) => {
   ];
 
   return (
-    <SidebarContainer>
-      <Logo>
-        <FiFileText />
-        <span>DocManager</span>
-      </Logo>
+    <>
+      <MobileMenuToggle isOpen={isMobileMenuOpen} onClick={toggleMobileMenu}>
+        {isMobileMenuOpen ? <FiX /> : <FiMenu />}
+      </MobileMenuToggle>
       
-      <Navigation>
-        <NavItem isActive={location.pathname === '/'}>
-          <NavLink to="/">
-            <FiHome />
-            <span>Dashboard</span>
-          </NavLink>
-        </NavItem>
+      <MobileOverlay isOpen={isMobileMenuOpen} onClick={() => setIsMobileMenuOpen(false)} />
+      
+      <SidebarContainer isOpen={isMobileMenuOpen}>
+        <Logo>
+          <FiFileText />
+          <span>DocManager</span>
+        </Logo>
         
-        <SectionTitle>Binders</SectionTitle>
-        
-        {binders.map(binder => (
-          <NavItem key={binder.id} isActive={location.pathname === `/binder/${binder.id}`}>
-            <NavLink to={`/binder/${binder.id}`}>
-              {getIconComponent(binder.icon)}
-              <span>{binder.name}</span>
+        <Navigation>
+          <NavItem isActive={location.pathname === '/'}>
+            <NavLink to="/">
+              <FiHome />
+              <span>Dashboard</span>
             </NavLink>
           </NavItem>
-        ))}
-        
-        {!showNewBinderForm ? (
-          <AddBinderButton onClick={() => setShowNewBinderForm(true)}>
-            <FiPlusCircle />
-            <span>Add Binder</span>
-          </AddBinderButton>
-        ) : (
-          <NewBinderForm>
-            <Input
-              type="text"
-              placeholder="Binder name"
-              value={newBinderName}
-              onChange={(e) => setNewBinderName(e.target.value)}
-            />
-            <IconSelector>
-              {iconOptions.map(icon => (
-                <IconOption 
-                  key={icon.name}
-                  isSelected={selectedIcon === icon.name}
-                  onClick={() => setSelectedIcon(icon.name)}
-                >
-                  {icon.component}
-                </IconOption>
-              ))}
-            </IconSelector>
-            <ButtonGroup>
-              <Button primary onClick={handleAddBinder}>Add</Button>
-              <Button onClick={() => setShowNewBinderForm(false)}>Cancel</Button>
-            </ButtonGroup>
-          </NewBinderForm>
-        )}
-      </Navigation>
-    </SidebarContainer>
+          
+          <SectionTitle>Binders</SectionTitle>
+          
+          {binders.map(binder => (
+            <NavItem key={binder.id} isActive={location.pathname === `/binder/${binder.id}`}>
+              <NavLink to={`/binder/${binder.id}`}>
+                {getIconComponent(binder.icon)}
+                <span>{binder.name}</span>
+              </NavLink>
+            </NavItem>
+          ))}
+          
+          {!showNewBinderForm ? (
+            <AddBinderButton onClick={() => setShowNewBinderForm(true)}>
+              <FiPlusCircle />
+              <span>Add Binder</span>
+            </AddBinderButton>
+          ) : (
+            <NewBinderForm>
+              <Input
+                type="text"
+                placeholder="Binder name"
+                value={newBinderName}
+                onChange={(e) => setNewBinderName(e.target.value)}
+              />
+              <IconSelector>
+                {iconOptions.map(icon => (
+                  <IconOption 
+                    key={icon.name}
+                    isSelected={selectedIcon === icon.name}
+                    onClick={() => setSelectedIcon(icon.name)}
+                  >
+                    {icon.component}
+                  </IconOption>
+                ))}
+              </IconSelector>
+              <ButtonGroup>
+                <Button primary onClick={handleAddBinder}>Add</Button>
+                <Button onClick={() => setShowNewBinderForm(false)}>Cancel</Button>
+              </ButtonGroup>
+            </NewBinderForm>
+          )}
+        </Navigation>
+      </SidebarContainer>
+    </>
   );
 };
 

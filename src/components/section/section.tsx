@@ -1,5 +1,5 @@
 // src/pages/SectionView.tsx
-import { useState, useRef } from 'react';
+import { useState, useRef, FormEvent } from 'react';
 import { 
   FiArrowLeft,
   FiCalendar,
@@ -10,18 +10,80 @@ import {
   FiTrash2,
   FiAlertCircle,
   FiClock,
-  FiSave
+  FiSave,
+  FiMessageSquare,
+  FiSend
 } from 'react-icons/fi';
 import { format } from 'date-fns';
 import { SectionViewProps } from './types';
-import { BackLink, Button, CloseButton, DatePickerBody, DatePickerContent, DatePickerFooter, DatePickerHeader, DatePickerModal, DueDateCard, DueDateIcon, DueDateInfo, DueDateLabel, DueDateValue, EmptyState, EmptyStateText, FileActionButton, FileActions, FileNameCell, FilesSection, FilesSectionHeader, FilesTable,  FilesTableCell, FilesTableHeader, FilesTableRow, FormGroup, FormInput, FormLabel, FormSelect, LastOpenedInfo, RecurrenceCard, RecurrenceIcon, RecurrenceInfo, RecurrenceLabel, RecurrenceValue, SectionDetailsRow, SectionHeader, SectionTitle, SectionViewContainer, UploadButton, UploadCard, UploadIcon, UploadInfo, UploadLabel, UploadValue } from './styled';
+import { 
+  BackLink, 
+  Button, 
+  CategoryOption, 
+  CategorySelector, 
+  CloseButton, 
+  CommentCategoryBadge, 
+  CommentDate, 
+  CommentForm, 
+  CommentFormTitle, 
+  CommentHeader, 
+  CommentItem, 
+  CommentsList, 
+  CommentsSection, 
+  CommentsSectionHeader, 
+  CommentText, 
+  CommentTextarea, 
+  DatePickerBody, 
+  DatePickerContent, 
+  DatePickerFooter, 
+  DatePickerHeader, 
+  DatePickerModal, 
+  DueDateCard, 
+  DueDateIcon, 
+  DueDateInfo, 
+  DueDateLabel, 
+  DueDateValue, 
+  EmptyState, 
+  EmptyStateText, 
+  FileActionButton, 
+  FileActions, 
+  FileNameCell, 
+  FilesSection, 
+  FilesSectionHeader, 
+  FilesTable, 
+  FilesTableCell, 
+  FilesTableHeader, 
+  FilesTableRow, 
+  FormGroup, 
+  FormInput, 
+  FormLabel, 
+  FormSelect, 
+  LastOpenedInfo, 
+  RecurrenceCard, 
+  RecurrenceIcon, 
+  RecurrenceInfo, 
+  RecurrenceLabel, 
+  RecurrenceValue, 
+  SectionDetailsRow, 
+  SectionHeader, 
+  SectionTitle, 
+  SectionViewContainer, 
+  SubmitButton, 
+  UploadButton, 
+  UploadCard, 
+  UploadIcon, 
+  UploadInfo, 
+  UploadLabel, 
+  UploadValue 
+} from './styled';
 import { Navigate, useParams } from 'react-router-dom';
-import { RecurrenceType } from '../../types';
+import { CommentCategory, RecurrenceType } from '../../types';
 
 const SectionView: React.FC<SectionViewProps> = ({ 
   binders, 
   updateSectionDueDate,
   uploadFile,
+  addComment
 }) => {
   const { binderId, sectionId } = useParams<{ binderId: string; sectionId: string }>();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -29,6 +91,10 @@ const SectionView: React.FC<SectionViewProps> = ({
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [dueDate, setDueDate] = useState<string>('');
   const [recurrence, setRecurrence] = useState<RecurrenceType>(null);
+  
+  // Comment form state
+  const [commentText, setCommentText] = useState('');
+  const [commentCategory, setCommentCategory] = useState<CommentCategory>('general');
   
   // Find the binder and section
   const binder = binders.find(b => b.id === binderId);
@@ -222,18 +288,18 @@ const SectionView: React.FC<SectionViewProps> = ({
             <tbody>
               {section.files.map(file => (
                 <FilesTableRow key={file.id}>
-                  <FilesTableCell>
+                <FilesTableCell data-label="Name">
                     <FileNameCell>
                       {getFileIcon(file.type)}
                       <span>{file.name}</span>
                     </FileNameCell>
                   </FilesTableCell>
-                  <FilesTableCell>{file.type.toUpperCase()}</FilesTableCell>
-                  <FilesTableCell>{formatFileSize(file.size)}</FilesTableCell>
-                  <FilesTableCell>
+                  <FilesTableCell data-label="Type">{file.type.toUpperCase()}</FilesTableCell>
+                  <FilesTableCell data-label="Size">{formatFileSize(file.size)}</FilesTableCell>
+                  <FilesTableCell data-label="Last Modified">
                     {format(file.lastModified, 'MMM d, yyyy')}
                   </FilesTableCell>
-                  <FilesTableCell>
+                  <FilesTableCell data-label="Actions">
                     <FileActions>
                       <FileActionButton title="Download">
                         <FiDownload />
@@ -258,6 +324,123 @@ const SectionView: React.FC<SectionViewProps> = ({
           </EmptyState>
         )}
       </FilesSection>
+      
+      <CommentsSection>
+        <CommentsSectionHeader>
+          <h2>Comments</h2>
+        </CommentsSectionHeader>
+        
+        {section.comments.length > 0 ? (
+          <CommentsList>
+            {section.comments.map(comment => (
+              <CommentItem key={comment.id}>
+                <CommentHeader>
+                  <CommentCategoryBadge category={comment.category}>
+                    {comment.category}
+                  </CommentCategoryBadge>
+                  <CommentDate>
+                    {format(comment.createdAt, 'MMM d, yyyy h:mm a')}
+                  </CommentDate>
+                </CommentHeader>
+                <CommentText>{comment.text}</CommentText>
+              </CommentItem>
+            ))}
+          </CommentsList>
+        ) : (
+          <EmptyState>
+            <FiMessageSquare />
+            <EmptyStateText>No comments yet</EmptyStateText>
+          </EmptyState>
+        )}
+        
+        <CommentForm onSubmit={(e: FormEvent) => {
+          e.preventDefault();
+          if (commentText.trim() && binderId && sectionId) {
+            addComment(binderId, sectionId, commentText.trim(), commentCategory);
+            setCommentText('');
+            setCommentCategory('general');
+          }
+        }}>
+          <CommentFormTitle>Add a Comment</CommentFormTitle>
+          
+          <CommentTextarea
+            value={commentText}
+            onChange={(e) => setCommentText(e.target.value)}
+            placeholder="Write your comment here..."
+            required
+          />
+          
+          <CategorySelector>
+            <CategoryOption 
+              isSelected={commentCategory === 'informative'} 
+              category="informative"
+              onClick={() => setCommentCategory('informative')}
+            >
+              <input 
+                type="radio" 
+                name="category" 
+                value="informative" 
+                checked={commentCategory === 'informative'} 
+                onChange={() => setCommentCategory('informative')} 
+              />
+              Informative
+            </CategoryOption>
+            
+            <CategoryOption 
+              isSelected={commentCategory === 'appearance'} 
+              category="appearance"
+              onClick={() => setCommentCategory('appearance')}
+            >
+              <input 
+                type="radio" 
+                name="category" 
+                value="appearance" 
+                checked={commentCategory === 'appearance'} 
+                onChange={() => setCommentCategory('appearance')} 
+              />
+              Appearance
+            </CategoryOption>
+            
+            <CategoryOption 
+              isSelected={commentCategory === 'grammatical'} 
+              category="grammatical"
+              onClick={() => setCommentCategory('grammatical')}
+            >
+              <input 
+                type="radio" 
+                name="category" 
+                value="grammatical" 
+                checked={commentCategory === 'grammatical'} 
+                onChange={() => setCommentCategory('grammatical')} 
+              />
+              Grammatical
+            </CategoryOption>
+            
+            <CategoryOption 
+              isSelected={commentCategory === 'general'} 
+              category="general"
+              onClick={() => setCommentCategory('general')}
+            >
+              <input 
+                type="radio" 
+                name="category" 
+                value="general" 
+                checked={commentCategory === 'general'} 
+                onChange={() => setCommentCategory('general')} 
+              />
+              General
+            </CategoryOption>
+          </CategorySelector>
+          
+          <SubmitButton 
+            type="submit" 
+            disabled={!commentText.trim()}
+          >
+            <FiSend />
+            Add Comment
+          </SubmitButton>
+        </CommentForm>
+      </CommentsSection>
       
       <LastOpenedInfo>
         <FiClock />

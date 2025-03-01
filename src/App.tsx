@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
-import { AppState, Binder, RecurrenceType, Section } from './types';
+import { AppState, Binder, CommentCategory, RecurrenceType, Section } from './types';
 import theme from './styles/theme';
 import GlobalStyle from './styles/global-style';
 import Sidebar from './components/sidebar/sidebar';
@@ -25,6 +25,9 @@ const initialState: AppState = {
           files: [
             { id: '1-1-1', name: 'Onboarding_Checklist.pdf', type: 'pdf', size: 245000, lastModified: new Date(2025, 1, 10) }
           ],
+          comments: [
+            { id: 'c1-1-1', text: 'Please update the checklist with new IT requirements', category: 'informative', createdAt: new Date(2025, 2, 20) }
+          ],
           lastOpened: new Date(2025, 2, 25)
         },
         {
@@ -35,6 +38,10 @@ const initialState: AppState = {
           files: [
             { id: '1-2-1', name: 'Employee_Handbook.pdf', type: 'pdf', size: 3500000, lastModified: new Date(2025, 0, 5) },
             { id: '1-2-2', name: 'Vacation_Policy.docx', type: 'docx', size: 125000, lastModified: new Date(2024, 11, 12) }
+          ],
+          comments: [
+            { id: 'c1-2-1', text: 'The formatting in section 3.2 needs to be fixed', category: 'appearance', createdAt: new Date(2025, 1, 15) },
+            { id: 'c1-2-2', text: 'There are several grammatical errors in the introduction', category: 'grammatical', createdAt: new Date(2025, 2, 5) }
           ],
           lastOpened: new Date(2025, 2, 20)
         }
@@ -53,6 +60,7 @@ const initialState: AppState = {
           files: [
             { id: '2-1-1', name: 'Q1_Financial_Summary.xlsx', type: 'xlsx', size: 450000, lastModified: new Date(2025, 2, 28) }
           ],
+          comments: [],
           lastOpened: new Date(2025, 2, 28)
         },
         {
@@ -62,6 +70,9 @@ const initialState: AppState = {
           recurrence: 'annual',
           files: [
             { id: '2-2-1', name: 'Audit_2024.pdf', type: 'pdf', size: 7800000, lastModified: new Date(2025, 0, 15) }
+          ],
+          comments: [
+            { id: 'c2-2-1', text: 'Please review the financial projections for next year', category: 'informative', createdAt: new Date(2025, 1, 10) }
           ],
           lastOpened: new Date(2025, 1, 5)
         }
@@ -80,6 +91,10 @@ const initialState: AppState = {
           files: [
             { id: '3-1-1', name: 'Design_Mockups.zip', type: 'zip', size: 25000000, lastModified: new Date(2025, 2, 1) },
             { id: '3-1-2', name: 'Project_Timeline.xlsx', type: 'xlsx', size: 350000, lastModified: new Date(2025, 2, 10) }
+          ],
+          comments: [
+            { id: 'c3-1-1', text: 'The timeline needs to be adjusted for the new requirements', category: 'informative', createdAt: new Date(2025, 2, 12) },
+            { id: 'c3-1-2', text: 'Design mockups look great!', category: 'general', createdAt: new Date(2025, 2, 5) }
           ],
           lastOpened: new Date(2025, 2, 15)
         }
@@ -136,6 +151,7 @@ const App = () => {
       dueDate: null,
       recurrence: null,
       files: [],
+      comments: [],
       lastOpened: new Date()
     };
     
@@ -194,6 +210,46 @@ const App = () => {
                   ? { 
                       ...section, 
                       files: [...section.files, newFile],
+                      lastOpened: new Date()
+                    }
+                  : section
+              )
+            }
+          : binder
+      )
+    }));
+    
+    // Update recent sections
+    updateRecentSections(binderId, sectionId);
+  };
+
+  // Add a comment to a section
+  const addComment = (
+    binderId: string,
+    sectionId: string,
+    text: string,
+    category: CommentCategory,
+    fileId?: string
+  ) => {
+    const newComment = {
+      id: `comment-${Date.now()}`,
+      text,
+      category,
+      createdAt: new Date(),
+      fileId
+    };
+    
+    setAppState(prev => ({
+      ...prev,
+      binders: prev.binders.map(binder => 
+        binder.id === binderId 
+          ? { 
+              ...binder, 
+              sections: binder.sections.map(section => 
+                section.id === sectionId 
+                  ? { 
+                      ...section, 
+                      comments: [...section.comments, newComment],
                       lastOpened: new Date()
                     }
                   : section
@@ -277,6 +333,7 @@ const App = () => {
                 updateSectionDueDate={updateSectionDueDate}
                 uploadFile={uploadFile}
                 updateRecentSections={updateRecentSections}
+                addComment={addComment}
               />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

@@ -54,6 +54,19 @@ const theme = {
       normal: '0.3s ease-in-out',
       slow: '0.5s ease-in-out',
     },
+    breakpoints: {
+      xs: '320px',
+      sm: '576px',
+      md: '768px',
+      lg: '992px',
+      xl: '1200px',
+    },
+    zIndices: {
+      base: 0,
+      overlay: 10,
+      modal: 20,
+      tooltip: 30,
+    },
   };
   
   export default theme;

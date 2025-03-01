@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { ButtonProps } from "./types";
 import { Link } from "react-router-dom";
+import { mediaDown } from "../../styles/responsive";
 
 export const BinderViewContainer = styled.div`
   display: flex;
@@ -12,6 +13,12 @@ export const BinderHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  
+  ${({ theme }) => mediaDown.sm(theme)} {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: ${({ theme }) => theme.spacing.md};
+  }
 `;
 
 export const BinderTitle = styled.div`
@@ -22,11 +29,27 @@ export const BinderTitle = styled.div`
   h1 {
     margin: 0;
     font-size: ${({ theme }) => theme.fontSizes.xxxl};
+    
+    ${({ theme }) => mediaDown.md(theme)} {
+      font-size: ${({ theme }) => theme.fontSizes.xxl};
+    }
+    
+    ${({ theme }) => mediaDown.sm(theme)} {
+      font-size: ${({ theme }) => theme.fontSizes.xl};
+    }
   }
   
   svg {
     font-size: ${({ theme }) => theme.fontSizes.xxxl};
     color: ${({ theme }) => theme.colors.primary};
+    
+    ${({ theme }) => mediaDown.md(theme)} {
+      font-size: ${({ theme }) => theme.fontSizes.xxl};
+    }
+    
+    ${({ theme }) => mediaDown.sm(theme)} {
+      font-size: ${({ theme }) => theme.fontSizes.xl};
+    }
   }
 `;
 
@@ -106,6 +129,11 @@ export const SectionsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: ${({ theme }) => theme.spacing.lg};
+  
+  ${({ theme }) => mediaDown.sm(theme)} {
+    grid-template-columns: 1fr;
+    gap: ${({ theme }) => theme.spacing.md};
+  }
 `;
 
 export const SectionCard = styled(Link)`
@@ -121,6 +149,10 @@ export const SectionCard = styled(Link)`
   &:hover {
     box-shadow: ${({ theme }) => theme.shadows.md};
     transform: translateY(-2px);
+  }
+  
+  ${({ theme }) => mediaDown.sm(theme)} {
+    padding: ${({ theme }) => theme.spacing.md};
   }
 `;
 

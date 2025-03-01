@@ -58,5 +58,18 @@ declare module 'styled-components' {
       normal: string;
       slow: string;
     };
+    breakpoints: {
+      xs: string;
+      sm: string;
+      md: string;
+      lg: string;
+      xl: string;
+    };
+    zIndices: {
+      base: number;
+      overlay: number;
+      modal: number;
+      tooltip: number;
+    };
   }
 }

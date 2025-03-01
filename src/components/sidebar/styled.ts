@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
-import styled from "styled-components";
-import { ButtonProps, IconOptionProps, NavItemProps } from "./types";
+import styled, { css } from "styled-components";
+import { ButtonProps, IconOptionProps, MobileMenuProps, NavItemProps, SidebarContainerProps } from "./types";
+import { mediaDown } from "../../styles/responsive";
 
-export const SidebarContainer = styled.div`
+export const SidebarContainer = styled.div<SidebarContainerProps>`
   width: 250px;
   background-color: ${({ theme }) => theme.colors.sidebar};
   border-right: 1px solid ${({ theme }) => theme.colors.border};
@@ -12,6 +13,58 @@ export const SidebarContainer = styled.div`
   height: 100vh;
   position: sticky;
   top: 0;
+  transition: transform ${({ theme }) => theme.transitions.normal};
+  z-index: ${({ theme }) => theme.zIndices.overlay};
+  
+  ${({ theme }) => mediaDown.md(theme)} {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    transform: ${({ isOpen }) => isOpen ? 'translateX(0)' : 'translateX(-100%)'};
+    box-shadow: ${({ isOpen, theme }) => isOpen ? theme.shadows.lg : 'none'};
+  }
+`;
+
+export const MobileMenuToggle = styled.button<MobileMenuProps>`
+  display: none;
+  position: fixed;
+  top: ${({ theme }) => theme.spacing.md};
+  left: ${({ isOpen, theme }) => isOpen ? '270px' : theme.spacing.md};
+  z-index: ${({ theme }) => theme.zIndices.modal};
+  background-color: ${({ theme }) => theme.colors.primary};
+  color: white;
+  border: none;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
+  width: 44px;
+  height: 44px;
+  justify-content: center;
+  align-items: center;
+  transition: all ${({ theme }) => theme.transitions.normal};
+  box-shadow: ${({ theme }) => theme.shadows.md};
+  
+  ${({ theme }) => mediaDown.md(theme)} {
+    display: flex;
+  }
+`;
+
+export const MobileOverlay = styled.div<MobileMenuProps>`
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: ${({ theme }) => theme.zIndices.overlay - 1};
+  opacity: ${({ isOpen }) => isOpen ? 1 : 0};
+  visibility: ${({ isOpen }) => isOpen ? 'visible' : 'hidden'};
+  transition: opacity ${({ theme }) => theme.transitions.normal},
+              visibility ${({ theme }) => theme.transitions.normal};
+  
+  ${({ theme }) => mediaDown.md(theme)} {
+    display: block;
+  }
 `;
 
 export const Logo = styled.div`
